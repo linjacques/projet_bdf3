@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+
+  spark-pyspark:
+    build: .
+    container_name: projet_bdf3
+    environment:
+      - PYSPARK_PYTHON=python
+      - PYSPARK_DRIVER_PYTHON=python
+    ports:
+      - "4040:4040"
+    volumes:
+      - ./app:/app
