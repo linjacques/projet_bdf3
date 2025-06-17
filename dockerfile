@@ -19,4 +19,4 @@ RUN pip install --no-cache-dir pyspark==${SPARK_VERSION}
 
 WORKDIR /app
 
-CMD ["python", "main.py"]
+CMD ["tail", "-f", "/dev/null"]
