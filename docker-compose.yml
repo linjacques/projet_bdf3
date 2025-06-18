@@ -12,3 +12,16 @@ services:
       - "4040:4040"
     volumes:
       - ./app:/app
+    depends_on :
+      - hive-server
+      
+  hive-server:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    environment:
+      - HIVE_METASTORE_DB_TYPE=postgres
+      - HIVE_METASTORE_HOST=host.docker.internal
+      - HIVE_METASTORE_DB_NAME=metastore_hive
+      - HIVE_METASTORE_USER=postgres
+      - HIVE_METASTORE_PASSWORD=130902
+    ports:  
+      - "10000:10000" 

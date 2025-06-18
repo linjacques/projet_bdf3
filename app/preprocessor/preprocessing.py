@@ -25,6 +25,4 @@ df_transformed = df_filtered.withColumn("double_age", col("age") * 2)
 
 # Afficher le résultat
 df_transformed.show()
-
-# Fermer la session Spark
-spark.stop()
+input("cliquer pour stoper")
