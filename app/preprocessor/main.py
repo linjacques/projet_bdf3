@@ -9,7 +9,7 @@ df = spark.read \
     .option("url", "jdbc:postgresql://host.docker.internal:5342/metastore_hive") \
     .option("user", "postgres") \
     .option("password", "130902") \
-    .option("dbtable", '"VERSION"') \
+    .option("dbtable", '"TBLS"') \
     .load()
 
 df.show()

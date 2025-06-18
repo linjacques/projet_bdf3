@@ -28,4 +28,8 @@
     <name>fs.defaultFS</name>
     <value>hdfs://namenode:9000</value>
   </property>
+  <property>
+  <name>hive.metastore.uris</name>
+  <value>thrift://hive-server:9083</value>
+  </property>
 </configuration>
