@@ -32,4 +32,8 @@
     <name>hive.metastore.uris</name>
     <value>thrift://hive-server:9083</value>
   </property>
+  <property>
+  <name>hive.server2.enable.doAs</name>
+  <value>false</value>
+</property>
 </configuration>
