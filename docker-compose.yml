@@ -44,7 +44,10 @@ services:
       - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
 
     volumes:
+      - ./hive-entrypoint.sh:/hive-entrypoint.sh
       - ./app/preprocessor/conf/hive-site.xml:/opt/hive/conf/hive-site.xml
+      - ./app/preprocessor/conf/postgresql-42.7.3.jar:/opt/hive/lib/postgresql-42.7.3.jar
+    command: ["bash", "/hive-entrypoint.sh"]
     ports:
       - "10000:10000"
     depends_on:
