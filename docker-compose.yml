@@ -2,6 +2,44 @@ version: "3.8"
 
 services:
 
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    environment:
+      - CLUSTER_NAME=test
+    ports:
+      - "9870:9870"   # Web UI du NameNode
+      - "9000:9000"   # HDFS (fs.defaultFS)
+    volumes:
+      - hdfs_namenode:/hadoop/dfs/name
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:9000
+      - HDFS_CONF_dfs_replication=1
+    depends_on:
+      - namenode
+    volumes:
+      - hdfs_datanode:/hadoop/dfs/data
+
+  hive-server:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive_server
+    environment:
+      - HIVE_METASTORE_DB_TYPE=postgres
+      - HIVE_METASTORE_HOST=host.docker.internal
+      - HIVE_METASTORE_DB_NAME=metastore_hive
+      - HIVE_METASTORE_USER=postgres
+      - HIVE_METASTORE_PASSWORD=130902
+      - HIVE_SITE_CONF_fs_defaultFS=hdfs://namenode:9000
+    depends_on:
+      - namenode
+      - datanode
+    ports:
+      - "10000:10000"  # HiveServer2
+
   spark-pyspark:
     build: .
     container_name: projet_bdf3
@@ -12,16 +50,14 @@ services:
       - "4040:4040"
     volumes:
       - ./app:/app
-    depends_on :
+      - ./app/preprocessor/conf/hive-site.xml:/opt/spark/conf/hive-site.xml
+    depends_on:
       - hive-server
-      
-  hive-server:
-    image: bde2020/hive:2.3.2-postgresql-metastore
-    environment:
-      - HIVE_METASTORE_DB_TYPE=postgres
-      - HIVE_METASTORE_HOST=host.docker.internal
-      - HIVE_METASTORE_DB_NAME=metastore_hive
-      - HIVE_METASTORE_USER=postgres
-      - HIVE_METASTORE_PASSWORD=130902
-    ports:  
-      - "10000:10000" 
+      - namenode
+      - datanode
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  hdfs_namenode:
+  hdfs_datanode:
