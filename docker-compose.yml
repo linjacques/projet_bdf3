@@ -65,6 +65,7 @@ services:
     volumes:
       - ./app:/app
       - ./app/preprocessor/conf/hive-site.xml:/opt/spark/conf/hive-site.xml
+      - ./app/preprocessor/conf/postgresql-42.7.3.jar:/opt/spark/jars/postgresql-42.7.3.jar
     depends_on:
       - hive-server
       - namenode
