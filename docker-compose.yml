@@ -67,21 +67,24 @@ services:
       - ./app:/app
       - ./app/preprocessor/conf/hive-site.xml:/opt/spark/conf/hive-site.xml
       - ./app/preprocessor/conf/postgresql-42.7.3.jar:/opt/spark/jars/postgresql-42.7.3.jar
-      - ./app/preprocessor/conf/yarn/core-site.xml:/opt/hadoop/conf/core-site.xml
-      - ./app/preprocessor/conf/yarn/yarn-site.xml:/opt/hadoop/conf/yarn-site.xml
-      - ./app/preprocessor/conf/yarn/mapred-site.xml:/opt/hadoop/conf/mapred-site.xml
+      - ./app/preprocessor/conf/yarn/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ./app/preprocessor/conf/yarn/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
+      - ./app/preprocessor/conf/yarn/mapred-site.xml:/opt/hadoop/etc/hadoop/mapred-site.xml
     depends_on:
       - hive-server
       - namenode
 
   resourcemanager:
-    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
+    build:
+      context: .
+      dockerfile: Dockerfile.resourcemanager
     container_name: resourcemanager
     environment:
       - YARN_CONF_yarn_resourcemanager_hostname=resourcemanager
       - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
     ports:
       - "8088:8088"
+      - "8032:8032"
     depends_on:
       - namenode
     volumes:
@@ -90,8 +93,11 @@ services:
       - ./app/preprocessor/conf/yarn/mapred-site.xml:/opt/hadoop/etc/hadoop/mapred-site.xml
 
   nodemanager:
-    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    build:
+      context: .
+      dockerfile: Dockerfile.nodemanager
     container_name: nodemanager
+    hostname: nodemanager
     environment:
       - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
       - YARN_CONF_yarn_resourcemanager_hostname=resourcemanager
@@ -101,6 +107,8 @@ services:
     volumes:
       - ./app/preprocessor/conf/yarn/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
       - ./app/preprocessor/conf/yarn/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
+    ports:
+      - "8042:8042"
 
 volumes:
   hadoop_namenode:
