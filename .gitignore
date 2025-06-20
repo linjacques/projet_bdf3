@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+US_Accidents_March23.csv*
+temp*
 # C extensions
 *.so
 

@@ -16,7 +16,7 @@ services:
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
       - ./namenode-entrypoint.sh:/namenode-entrypoint.sh
-      - ./conf/yarn/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ./app/conf/yarn/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
     command: [ "bash", "/namenode-entrypoint.sh" ]
 
   datanode:
