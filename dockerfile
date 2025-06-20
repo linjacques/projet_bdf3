@@ -39,6 +39,8 @@ RUN wget https://archive.apache.org/dist/hive/hive-3.1.3/apache-hive-3.1.3-bin.t
     mv /opt/apache-hive-3.1.3-bin /opt/hive && \
     rm apache-hive-3.1.3-bin.tar.gz
 
+
+    
 # -------------------
 # Working directory
 # -------------------
