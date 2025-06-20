@@ -16,7 +16,7 @@ services:
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
       - ./namenode-entrypoint.sh:/namenode-entrypoint.sh
-      - ./app/preprocessor/conf/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ./conf/yarn/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
     command: [ "bash", "/namenode-entrypoint.sh" ]
 
   datanode:
@@ -45,8 +45,8 @@ services:
 
     volumes:
       - ./hive-entrypoint.sh:/hive-entrypoint.sh
-      - ./app/preprocessor/conf/hive-site.xml:/opt/hive/conf/hive-site.xml
-      - ./app/preprocessor/conf/postgresql-42.7.3.jar:/opt/hive/lib/postgresql-42.7.3.jar
+      - ./app/conf/hive/hive-site.xml:/opt/hive/conf/hive-site.xml
+      - ./app/conf/jars/postgresql-42.7.3.jar:/opt/hive/lib/postgresql-42.7.3.jar
     command: ["bash", "/hive-entrypoint.sh"]
     ports:
       - "10000:10000"
@@ -65,11 +65,11 @@ services:
       - "4040:4040"
     volumes:
       - ./app:/app
-      - ./app/preprocessor/conf/hive-site.xml:/opt/spark/conf/hive-site.xml
-      - ./app/preprocessor/conf/postgresql-42.7.3.jar:/opt/spark/jars/postgresql-42.7.3.jar
-      - ./app/preprocessor/conf/yarn/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
-      - ./app/preprocessor/conf/yarn/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
-      - ./app/preprocessor/conf/yarn/mapred-site.xml:/opt/hadoop/etc/hadoop/mapred-site.xml
+      - ./app/conf/hive/hive-site.xml:/opt/spark/conf/hive-site.xml
+      - ./app/conf/jars/postgresql-42.7.3.jar:/opt/spark/jars/postgresql-42.7.3.jar
+      - ./app/conf/yarn/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ./app/conf/yarn/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
+      - ./app/conf/yarn/mapred-site.xml:/opt/hadoop/etc/hadoop/mapred-site.xml
     depends_on:
       - hive-server
       - namenode
@@ -88,9 +88,9 @@ services:
     depends_on:
       - namenode
     volumes:
-      - ./app/preprocessor/conf/yarn/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
-      - ./app/preprocessor/conf/yarn/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
-      - ./app/preprocessor/conf/yarn/mapred-site.xml:/opt/hadoop/etc/hadoop/mapred-site.xml
+      - ./app/conf/yarn/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ./app/conf/yarn/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
+      - ./app/conf/yarn/mapred-site.xml:/opt/hadoop/etc/hadoop/mapred-site.xml
 
   nodemanager:
     build:
@@ -105,8 +105,8 @@ services:
       - resourcemanager
       - namenode
     volumes:
-      - ./app/preprocessor/conf/yarn/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
-      - ./app/preprocessor/conf/yarn/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
+      - ./app/conf/yarn/core-site.xml:/opt/hadoop/etc/hadoop/core-site.xml
+      - ./app/conf/yarn/yarn-site.xml:/opt/hadoop/etc/hadoop/yarn-site.xml
     ports:
       - "8042:8042"
 
