@@ -116,10 +116,22 @@ spark-submit \
   /app/job_spark1.py
 ```
 
-### 4. Accéder aux interfaces
+### 4. Résultats 
 
-* **YARN UI** : [http://localhost:8088](http://localhost:8088)
-* **HDFS UI** : [http://localhost:9870](http://localhost:9870)
+Vous pourrez voir le résultat de vos jobs spark via les interfaces suivantes :
+
+* **YARN UI** : [http://localhost:8088](http://localhost:8088) -> Pour voir les logs de vos jobs spark
+* **HDFS UI** : [http://localhost:9870](http://localhost:9870) -> Pour voir les données stockées dans HDFS
 
 
 ---
+
+### Debug 
+
+Si jamais vous rencontrez des soucis avec le setup ou le lancement du projet, veuillez lire le README nommé : `debug.rd`
+qui je l'espère vous aidera à régler les problèmes !
+
+
+
+
+
