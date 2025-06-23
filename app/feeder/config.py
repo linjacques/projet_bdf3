@@ -1,21 +1,25 @@
 import os
 
 class Config:
-    # Chemin local pour Temp (données du jour uniquement)
-    TEMP_PATH = "/app/bronze_data/temp"
-
-    # Chemin HDFS pour Bronze (données cumulées)
-    BRONZE_ROOT = "hdfs://namenode:8020/lakehouse/bronze"
+    TEMP_PATH = "hdfs://namenode:8020/save_hdfs/pre_bronze"
+    BRONZE_ROOT = "hdfs://namenode:8020/save_hdfs/union"
 
     @staticmethod
-    def get_temp_dates():
-        """
-        Liste les dates disponibles dans TEMP_PATH (local uniquement)
-        """
+    def get_temp_dates(spark):  # <-- ajouter spark ici !
         try:
-            return sorted(os.listdir(Config.TEMP_PATH))
-        except FileNotFoundError:
-            print(f" Dossier temp non trouvé : {Config.TEMP_PATH}")
+            hadoop_conf = spark._jsc.hadoopConfiguration()
+            fs = spark._jvm.org.apache.hadoop.fs.FileSystem.get(hadoop_conf)
+            path = spark._jvm.org.apache.hadoop.fs.Path(Config.TEMP_PATH)
+
+            if not fs.exists(path):
+                print(f"Dossier temp HDFS non trouvé : {Config.TEMP_PATH}")
+                return []
+
+            statuses = fs.listStatus(path)
+            dates = [status.getPath().getName() for status in statuses if status.isDirectory()]
+            return sorted(dates)
+        except Exception as e:
+            print(f"Erreur listage dates dans TEMP_PATH HDFS : {e}")
             return []
 
     @staticmethod
@@ -23,5 +27,5 @@ class Config:
         """
         Construit le chemin parquet pour une date donnée
         """
+        # Pas besoin de modifier ici, fonctionne aussi pour HDFS
         return os.path.join(base, date_str, "parquet")
- 

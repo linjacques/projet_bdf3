@@ -28,7 +28,7 @@ def setup_logger(log_dir="logs", log_file=None):
 
     logging.info(f"Logger initialisé, les logs seront enregistrés ici : {log_path}")
 
-setup_logger()  
+setup_logger()
 
 
 spark = SparkSession.builder \
@@ -37,6 +37,7 @@ spark = SparkSession.builder \
     .getOrCreate()
 
 logging.info(" Spark prêt")
+
 
 def get_last_bronze_date():
     try:
@@ -56,7 +57,7 @@ last_bronze_date = get_last_bronze_date()
 logging.info(f" Dernier bronze trouvé : {last_bronze_date}")
 
 # Étape 2 : lister les dates Temp disponibles (local)
-all_temp_dates = Config.get_temp_dates()
+all_temp_dates = Config.get_temp_dates(spark)
 logging.info(f" Dates temp disponibles : {all_temp_dates}")
 
 # Étape 3 : déterminer les dates à traiter
@@ -67,15 +68,19 @@ logging.info(f" Nouvelles dates à traiter : {dates_to_process}")
 for new_date in dates_to_process:
     logging.info(f"\n Traitement du jour : {new_date}")
 
+    # Chemin d'entrée dans pre_bronze sur HDFS
     path_today = Config.get_parquet_path(Config.TEMP_PATH, new_date)
-    path_today = f"file://{path_today}"
+    # Pas besoin de préfixe "file://", c'est un chemin HDFS
+    # spark lit automatiquement les chemins HDFS avec ce format
+    # donc ici path_today = "hdfs://namenode:8020/save_hdfs/pre_bronze/{new_date}/parquet"
 
     df_today = spark.read.parquet(path_today)
     logging.info(f" {df_today.count()} lignes lues depuis {path_today}")
 
     if last_bronze_date:
         path_bronze = Config.get_parquet_path(Config.BRONZE_ROOT, last_bronze_date)
-        path_bronze = f"{path_bronze}/parquet" if not path_bronze.endswith("parquet") else path_bronze
+        # Par défaut ici, path_bronze = "hdfs://namenode:8020/save_hdfs/union/{last_bronze_date}/parquet"
+        path_bronze = path_bronze if path_bronze.endswith("parquet") else f"{path_bronze}/parquet"
         try:
             df_prev = spark.read.parquet(path_bronze)
             logging.info(f" {df_prev.count()} lignes dans le bronze précédent : {last_bronze_date}")
