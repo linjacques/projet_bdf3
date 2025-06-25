@@ -28,6 +28,7 @@ def setup_logger(log_dir="logs", log_file=None):
 
     logging.info(f"Logger initialisé, les logs seront enregistrés ici : {log_path}")
 
+
 setup_logger()
 
 

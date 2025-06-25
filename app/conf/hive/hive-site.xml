@@ -2,7 +2,7 @@
 <configuration>
   <property>
     <name>javax.jdo.option.ConnectionURL</name>
-    <value>jdbc:postgresql://host.docker.internal:5432/metastore_hive</value>
+    <value>jdbc:postgresql://host.docker.internal:5342/metastore_hive</value>
   </property>
   <property>
     <name>javax.jdo.option.ConnectionDriverName</name>
@@ -14,7 +14,7 @@
   </property>
   <property>
     <name>javax.jdo.option.ConnectionPassword</name>
-    <value>20030205</value>
+    <value>130902</value>
   </property>
   <property>
     <name>datanucleus.schema.autoCreateAll</name>
