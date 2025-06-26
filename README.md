@@ -37,7 +37,7 @@ Ce projet repose sur les technos suivantes :
 * Hadoop 3.2.1
 * Spark 3.5.6 + PySpark
 * Hive 3.1.3
-* PostgreSQL (metastore Hive)
+* PostgreSQL + PgAdmin4
 * Docker
 * Python 3.10
 ---
@@ -59,9 +59,9 @@ git clone https://github.com/ton-utilisateur/projet_bdf3.git
 cd projet_bdf3
 ```
 
-### 2. Changer les informations de connexion Postgres
+### 2. Changer les informations de connexion postgres
 
-Dans `app/conf/hive/hive-site.xml` changer les propriétés suivantes :
+Dans `app/conf/hive/hive-site.xml` changer les propriétés suivantes pour que Hiveserver puisse se connecter et initialiser le schema plus tard :
 
 ```xml
   <property>
@@ -78,27 +78,27 @@ Dans `app/conf/hive/hive-site.xml` changer les propriétés suivantes :
   </property>
 ```
 
-le metastore Hive a besoin de se lier à une **Base de donnée relationnelle** pour pouvoir y stocker les métadonnées. Bien vérifier que la Base de données `metastore_hive` existe dans Postgres, sinon la connexion va échouer! 
+le metastore Hive a besoin de se lier à une **Base de donnée relationnelle** pour pouvoir y stocker les métadonnées. Bien vérifier que la Base de données `metastore_hive` existe dans postgres, sinon la connexion va échouer! 
 
-**Attention, PostgresSQL doit être installé non pas dans docker mais sur votre machine en client-lourd dans le cadre de ce projet!**
+**Attention, Il faut avoir PostgresSQL en client lourd (le logiciel) plutôt qu'une image docker pour ce projet!**
 
-### 2.Construire et Lancer les containers
+### 2. Construire et Lancer les containers
 
 ```bash
 docker compose up -d --build
 ```
-**A ce stade, le container `hive-server` ne démarre pas correctement** ou bien il s'éteint au bout de quelques minutes en raison d'une erreur de connexion à Postgres ou que le schema Hive n'existe pas. Dans ce cas, il faudra bien lire les étapes suivantes car ils sont là pour debug !
+**A ce stade, le container `hive-server` ne démarre pas correctement** ou bien il s'éteint au bout de quelques minutes en raison d'une erreur de connexion à postgres ou que le schema Hive n'existe pas. Dans ce cas, il faudra bien lire les étapes suivantes car ils sont là pour debug !
 
-### 3. Supprimer les vieux jars JDBC de postgres dans le container `hive-server`
+### 3. debug du container `hive-server`
   
-  Par défaut, l'image `bde2020/hive:2.3.2-postgresql-metastore` du container vient avec d'ancienne version des jars JDBC de postgres ! On les supprime dans ce projet car ces anciens JDBC semblent ne pas fonctionner avec les version récentes de Postgres ! Par conséquent ils seront remplacé par le JDBC situé dans `app/conf/jars/postgresql-42.7.3.jar`
+  Par défaut, l'image `bde2020/hive:2.3.2-postgresql-metastore` du container vient avec d'ancienne version des jars JDBC de postgres ! On les supprime dans ce projet car ces anciens JDBC semblent ne pas fonctionner avec les version récentes de postgres ! Pour ce projet, nous allons utiliser le JDBC situé dans `app/conf/jars/postgresql-42.7.3.jar` qui est beaucoup plus récent et qui sera automatiquement monté dans le volume du container. 
 
-  **Entrer dans le shell du container `hive-server`**
+  **A. Entrer dans le shell du container `hive-server`**
   ```bash
       docker exec -it hive-server bash
   ```
 
-  **Ensuite, supprimer les vieilles versions jars**
+  **B. supprimer les vieilles versions du JDBC postgres**
   ```bash
       rm /opt/hive/lib/postgresql-9.4.1208.jre7.jar   
   ```
@@ -106,32 +106,30 @@ docker compose up -d --build
       rm /opt/hive/lib/postgresql-jdbc.jar
   ```
 
-  **Enfin, vérifier qu'ils ont été supprimés**
+  **C. vérifier qu'ils ont été supprimés**
   ```bash
      find /opt/hive/lib -name "postgresql-*.jar"
   ```
 
-  **Redémarrer le container `hive-server`**
+  on doit avoir uniquement ces 2 fichiers JAR maintenant : 
   ```bash
-    docker restart hive-server
-  ```
-  le container `hive-server` devrait démarrer sans crash ou erreur
-
-### 3. Initialiser le schéma Hive metastore
-
-  Pour vérfier que le container `hive-server` a bien démarré **et** que le metastore hive est bien relié à Postgres :
-
-   **Entrer dans le shell du container `hive-server`**
-  ```bash
-      docker exec -it hive-server bash
+  /opt/hive/lib/postgresql-metadata-storage-0.9.2.jar
+  /opt/hive/lib/postgresql-42.7.3.jar
   ```
 
-  **Exécuter le script d'initialisation**
+  Une fois les suppressions faites, on va tester la connexion entre hive et postgres. Pour ca on va initialiser le schéma du metastore Hive
+
+  **D. Exécuter le script d'initialisation du schéma Hive metastore**
   ```bash
       schematool -dbType postgres -initSchema
   ```
 
-Normalement, le schéma et les tables ont étés créées dans la base de données `metastore_hive` de Postgres et les tables qui nous intéresent sont :
+  **E. Redémarrer le container `hive-server`**
+  ```bash
+    docker restart hive-server
+  ```
+
+Normalement, le schéma et les tables ont étés créées dans la base de données `metastore_hive` de Postgres. Aller dans PgAdmin4 pour voir les tables suivantes :
 ```
 DBS
 → Contient les bases de données Hive
@@ -157,15 +155,34 @@ SERDES
 TABLE_PARAMS
 → Contient les paramètres personnalisés d'une table (comme les propriétés TBLPROPERTIES).
 ```
+### 4. lancer le serveur Hive 
 
-### **optionnel**. Initialiser les permissions dans le container `namenode` (HDFS)
+  **A. Entrer dans le shell du container `hive-server`**
+  ```bash
+      docker exec -it hive-server bash
+  ```
 
-```bash
-docker exec -it namenode bash
-hdfs dfs -mkdir -p /tmp/logs
-hdfs dfs -chown -R yarn:hadoop /tmp/logs
-hdfs dfs -chmod -R 1777 /tmp/logs
-```
+  **A. Lancer le serveur hive**
+  ```bash
+      hiveserver2
+  ```
+
+  et on doit voir ca : 
+  ```bash
+    SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+    root@ed4ddd3c4cc9:/opt# 
+  ```
+
+  le `root@ed4ddd3c4cc9:/opt#` signifie que le serveur Hive fonctionne et qu'on est dans le shell de Hive ! On peut ensuite se connecter à Postgres avec Beeline: 
+  ```bash
+    beeline -u jdbc:hive2://localhost:10000
+  ```
+
+  Et voir le contenu de la Base de donnée ou des tables 
+  ```sql
+    show databases;
+    show tables;
+  ```
 
 ---
 
@@ -200,7 +217,7 @@ spark-submit \
   --conf spark.yarn.appMasterEnv.PYSPARK_PYTHON=python3 \
   --conf spark.executorEnv.PYSPARK_PYTHON=python3 \
   --conf spark.hadoop.yarn.resourcemanager.hostname=resourcemanager \
-  /app/job_spark1.py
+  app/job_spark1.py
 ```
 
 ### 4. Résultats 
