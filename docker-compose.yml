@@ -36,6 +36,11 @@ services:
     image: bde2020/hive:2.3.2-postgresql-metastore
     container_name: hive-server
     environment:
+      - HIVE_METASTORE_DB_TYPE=postgres
+      - HIVE_METASTORE_HOST=host.docker.internal:5342
+      - HIVE_METASTORE_DB_NAME=metastore_hive
+      - HIVE_METASTORE_USER=postgres
+      - HIVE_METASTORE_PASSWORD=130902
       - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
     volumes:
       - ./hive-entrypoint.sh:/hive-entrypoint.sh
