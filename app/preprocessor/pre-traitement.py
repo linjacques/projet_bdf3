@@ -85,7 +85,7 @@ def apply_unit_conversions(df):
     cols_to_drop = [col_name for col_name in conversions if col_name in df.columns]
     if cols_to_drop:
         df = df.drop(*cols_to_drop)
-        logging.info(f"🧹 Colonnes supprimées après conversion : {', '.join(cols_to_drop)}")
+        logging.info(f" Colonnes supprimées après conversion : {', '.join(cols_to_drop)}")
     else:
         logging.info(" Aucune colonne à supprimer.")
 
@@ -98,7 +98,7 @@ def apply_unit_conversions(df):
     return df
 
 def transform_categorical_features(df):
-    logging.info("🔄 Début de la transformation des variables catégorielles...")
+    logging.info(" Début de la transformation des variables catégorielles...")
 
     # Étape 1 : remplacement des NULL
     df = df.fillna({
@@ -122,7 +122,7 @@ def transform_categorical_features(df):
     df_transformed = model.transform(df)
     df_transformed = df_transformed.drop("Timezone", "State", "Weather_Condition")
 
-    logging.info("✅ Transformation des variables catégorielles terminée.")
+    logging.info(" Transformation des variables catégorielles terminée.")
     return df_transformed
 
 
