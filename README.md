@@ -78,6 +78,19 @@ Dans `app/conf/hive/hive-site.xml` changer les propriétés suivantes pour que H
   </property>
 ```
 
+Et dans le `docker-compose.yml` modifier les informations suivantes du container `hive-server`:
+
+```bash
+  hive-server:
+    ...
+    environment:
+      - HIVE_METASTORE_DB_TYPE=postgres
+      - HIVE_METASTORE_HOST=host.docker.internal:5432
+      - HIVE_METASTORE_DB_NAME=votre_bdd
+      - HIVE_METASTORE_USER=votre_user
+      - HIVE_METASTORE_PASSWORD=votre_mdp
+```
+
 le metastore Hive a besoin de se lier à une **Base de donnée relationnelle** pour pouvoir y stocker les métadonnées. Bien vérifier que la Base de données `metastore_hive` existe dans postgres, sinon la connexion va échouer! 
 
 **Attention, Il faut avoir PostgresSQL en client lourd (le logiciel) plutôt qu'une image docker pour ce projet!**
