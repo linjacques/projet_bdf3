@@ -5,12 +5,10 @@ import sys
 import io
 import logging
 from datetime import datetime
-from pyspark.sql.functions import round as spark_round, count, unix_timestamp, round, upper, trim, when, radians,isnan, sin, cos, col
+from pyspark.sql.functions import round as spark_round,mean,percentile_approx, count, unix_timestamp, round, upper, trim, when, radians,isnan, sin, cos, col
 from pyspark.ml.feature import StringIndexer
 from pyspark.ml import Pipeline
 
-
-# Ajout du dossier parent dans le sys.path pour importer feeder.config
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from feeder.config import Config
 
@@ -85,7 +83,7 @@ def apply_unit_conversions(df):
     cols_to_drop = [col_name for col_name in conversions if col_name in df.columns]
     if cols_to_drop:
         df = df.drop(*cols_to_drop)
-        logging.info(f"🧹 Colonnes supprimées après conversion : {', '.join(cols_to_drop)}")
+        logging.info(f" Colonnes supprimées après conversion : {', '.join(cols_to_drop)}")
     else:
         logging.info(" Aucune colonne à supprimer.")
 
@@ -98,16 +96,14 @@ def apply_unit_conversions(df):
     return df
 
 def transform_categorical_features(df):
-    logging.info("🔄 Début de la transformation des variables catégorielles...")
+    logging.info(" Début de la transformation des variables catégorielles...")
 
-    # Étape 1 : remplacement des NULL
     df = df.fillna({
         "Timezone": "UNKNOWN",
         "State": "UNKNOWN",
         "Weather_Condition": "UNKNOWN"
     })
 
-    # Étape 2 : définition des indexers
     indexers = [
         StringIndexer(inputCol="Timezone", outputCol="Timezone_index", handleInvalid="keep"),
         StringIndexer(inputCol="State", outputCol="State_index", handleInvalid="keep"),
@@ -116,20 +112,17 @@ def transform_categorical_features(df):
 
     pipeline_stages = indexers
 
-    # Pipeline
     pipeline = Pipeline(stages=pipeline_stages)
     model = pipeline.fit(df)
     df_transformed = model.transform(df)
     df_transformed = df_transformed.drop("Timezone", "State", "Weather_Condition")
 
-    logging.info("✅ Transformation des variables catégorielles terminée.")
+    logging.info(" Transformation des variables catégorielles terminée.")
     return df_transformed
-
 
 def clean_wind_direction(df):
     df = df.withColumn("Wind_Direction_clean", upper(trim(col("Wind_Direction"))))
 
-    # Harmonisation de quelques cas
     df = df.withColumn("Wind_Direction_clean", when(col("Wind_Direction_clean").isin("CALM", "VARIABLE", "VAR", "NULL"), "UNKNOWN")
                        .when(col("Wind_Direction_clean") == "VAR", "VARIABLE")
                        .when(col("Wind_Direction_clean") == "EAST", "E")
@@ -138,7 +131,6 @@ def clean_wind_direction(df):
                        .when(col("Wind_Direction_clean") == "SOUTH", "S")
                        .otherwise(col("Wind_Direction_clean")))
 
-    # Étape 3 : Mapping direction ➝ angle
     df = df.withColumn("wind_angle",
                        when(col("Wind_Direction_clean") == "N", 0.0)
                        .when(col("Wind_Direction_clean") == "NNE", 22.5)
@@ -159,7 +151,6 @@ def clean_wind_direction(df):
                        .otherwise(None)  # UNKNOWN, NULL ou autres
                        )
 
-    # Étape 4 : Calcul de sin/cos directement dans Spark
     df = df.withColumn("wind_dir_sin", sin(radians(col("wind_angle"))))
     df = df.withColumn("wind_dir_cos", cos(radians(col("wind_angle"))))
     df = df.fillna({"wind_dir_sin": 0.0, "wind_dir_cos": 0.0})
@@ -167,9 +158,7 @@ def clean_wind_direction(df):
 
     return df
 
-
 def transform_binary_features(df):
-    # Colonnes booléennes à transformer en 0/1
     bool_cols = [
         "Amenity", "Bump", "Crossing", "Give_Way", "Junction", "No_Exit",
         "Railway", "Roundabout", "Station", "Stop", "Traffic_Calming",
@@ -183,7 +172,6 @@ def transform_binary_features(df):
         )
     df = df.drop(*bool_cols)
 
-    # Colonnes day/night à transformer en 1/0 (day=1, night=0), null ou autre = -1
     day_night_cols = [
         "Sunrise_Sunset", "Civil_Twilight", "Nautical_Twilight", "Astronomical_Twilight"
     ]
@@ -199,6 +187,32 @@ def transform_binary_features(df):
 
     return df
 
+def manage_null_values(df):
+    logging.info(" Début de la gestion des valeurs NULL...")
+
+    numeric_mean_cols = [
+        "Temperature(C)", "Humidity(%)", "Pressure(in)", "Wind_Speed_kmh", "Visibility_km"
+    ]
+    numeric_zero_cols = ["Precipitation(cm)", "duration_minutes_record_weather"]
+    numeric_median_cols = ["Wind_Chill(C)"]
+
+    for col_name in numeric_mean_cols:
+        mean_val = df.select(mean(col(col_name))).first()[0]
+        df = df.fillna({col_name: mean_val})
+        df = df.withColumn(col_name, spark_round(col(col_name), 2))
+
+    for col_name in numeric_zero_cols:
+        df = df.fillna({col_name: 0.0})
+        df = df.withColumn(col_name, spark_round(col(col_name), 2))
+
+    for col_name in numeric_median_cols:
+        median_val = df.select(percentile_approx(col_name, 0.5)).first()[0]
+        df = df.fillna({col_name: median_val})
+        df = df.withColumn(col_name, spark_round(col(col_name), 2))
+
+    logging.info(" Fin de la gestion des valeurs NULL avec arrondi.")
+    return df
+
 def drop_columns(df, columns_to_drop):
     existing_cols_to_drop = [col for col in columns_to_drop if col in df.columns]
     if not existing_cols_to_drop:
@@ -209,7 +223,19 @@ def drop_columns(df, columns_to_drop):
     logging.info(f"Colonnes supprimées : {', '.join(existing_cols_to_drop)}")
     return df_dropped
 
-def inspect_last_bronze(spark):
+def save_to_silver(df, processing_date=None):
+
+    if processing_date is None:
+        processing_date = datetime.today().strftime("%Y-%m-%d")
+
+    silver_path = Config.get_parquet_path(Config.ARGENT_ROOT, processing_date)
+    logging.info(f"Sauvegarde Silver dans HDFS : {silver_path}")
+
+    df.coalesce(1).write.mode("overwrite").parquet(silver_path)
+
+    logging.info(f"Silver mis à jour pour {processing_date} : {df.count()} lignes")
+
+def inspect_last_bronze_traitement_and_save(spark):
     last_date = get_last_bronze_date(spark)
     if not last_date:
         logging.warning("Pas de dossier bronze à inspecter.")
@@ -227,9 +253,17 @@ def inspect_last_bronze(spark):
         df = apply_unit_conversions(df)
         df = clean_wind_direction(df)
         df = transform_categorical_features(df)
-        colonnes_a_supprimer = ["ID", "Description", "situation_date"]
+        colonnes_a_supprimer = ["ID", "Description", "situation_date","Airport_Code", "Source", "Street","City","Country", "County"]
         df = drop_columns(df, colonnes_a_supprimer)
+
         df = transform_binary_features(df)
+
+        cols_to_drop = [
+            "Start_Lat", "Start_Lng", "End_Lat", "End_Lng",
+            "Start_Time", "End_Time", "Zipcode"
+        ]
+        df = df.drop(*cols_to_drop)
+        df = manage_null_values(df)
 
         logging.info("--- Aperçu des 5 premières lignes ---")
         log_df_show(df, 100)
@@ -259,12 +293,13 @@ def inspect_last_bronze(spark):
 
         null_counts.show(truncate=False)
 
+        save_to_silver(df, '2025-06-20')
 
     except Exception as e:
         logging.error(f"Erreur pendant l'inspection du Bronze : {e}")
 
 
-# MAIN
+
 setup_logger()
 
 spark = SparkSession.builder \
@@ -274,7 +309,7 @@ spark = SparkSession.builder \
 
 logging.info("Spark session initialisée")
 
-inspect_last_bronze(spark)
+inspect_last_bronze_traitement_and_save(spark)
 
 spark.stop()
-logging.info("✅ Fin de l’analyse pré-traitement")
+logging.info("Fin de l’analyse pré-traitement")
