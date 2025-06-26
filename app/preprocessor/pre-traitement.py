@@ -88,7 +88,7 @@ def apply_unit_conversions(df):
         logging.info(" Aucune colonne à supprimer.")
 
     df = df.withColumn("duration_minutes_accident",
-                   round((unix_timestamp("End_Time") - unix_timestamp("Start_Time")) / 60, 2))
+                       round((unix_timestamp("End_Time") - unix_timestamp("Start_Time")) / 60, 2))
     df = df.withColumn("duration_minutes_record_weather",
                        round((unix_timestamp("Weather_Timestamp") - unix_timestamp("Start_Time")) / 60, 2))
     df = df.drop("Start_Time", "End_Time", "Weather_Timestamp")
@@ -148,7 +148,7 @@ def clean_wind_direction(df):
                        .when(col("Wind_Direction_clean") == "WNW", 292.5)
                        .when(col("Wind_Direction_clean") == "NW", 315.0)
                        .when(col("Wind_Direction_clean") == "NNW", 337.5)
-                       .otherwise(None)  # UNKNOWN, NULL ou autres
+                       .otherwise(None)
                        )
 
     df = df.withColumn("wind_dir_sin", sin(radians(col("wind_angle"))))
@@ -293,12 +293,10 @@ def inspect_last_bronze_traitement_and_save(spark):
 
         null_counts.show(truncate=False)
 
-        save_to_silver(df, '2025-06-20')
+        save_to_silver(df, '2025-06-19')
 
     except Exception as e:
         logging.error(f"Erreur pendant l'inspection du Bronze : {e}")
-
-
 
 setup_logger()
 
