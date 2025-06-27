@@ -10,6 +10,9 @@
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
 
+    if not log_file:
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
+        log_file = f"feeder_{timestamp}.log"
         if not log_file:
             # Exemple de nom : feeder_2025-06-20_15-42.log
             timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
@@ -17,6 +20,14 @@
 
         log_path = os.path.join(log_dir, log_file)
 
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[
+            logging.FileHandler(log_path),
+            logging.StreamHandler()
+        ]
+    )
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s [%(levelname)s] %(message)s",
@@ -69,6 +80,8 @@
     # Étape 4 : boucle de traitement incrémental
     for new_date in dates_to_process:
         logging.info(f"\n Traitement du jour : {new_date}")
+
+    path_today = Config.get_parquet_path(Config.TEMP_PATH, new_date)
 
         # Chemin d'entrée dans pre_bronze sur HDFS
         path_today = Config.get_parquet_path(Config.TEMP_PATH, new_date)

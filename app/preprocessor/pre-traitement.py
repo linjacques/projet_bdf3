@@ -83,6 +83,7 @@ def apply_unit_conversions(df):
         logging.info(" Aucune colonne à supprimer.")
     df = df.withColumn("duration_minutes_accident",
                        round((unix_timestamp("End_Time") - unix_timestamp("Start_Time")) / 60, 2))
+                       round((unix_timestamp("End_Time") - unix_timestamp("Start_Time")) / 60, 2))
     df = df.withColumn("duration_minutes_record_weather",
                        round((unix_timestamp("Weather_Timestamp") - unix_timestamp("Start_Time")) / 60, 2))
     df = df.drop("Start_Time", "End_Time", "Weather_Timestamp")
@@ -107,7 +108,6 @@ def transform_categorical_features(df):
     df_transformed = df_transformed.drop("Timezone", "State", "Weather_Condition")
     logging.info(" Transformation des variables catégorielles terminée.")
     return df_transformed
-
 
 def clean_wind_direction(df):
     df = df.withColumn("Wind_Direction_clean", upper(trim(col("Wind_Direction"))))
@@ -141,7 +141,6 @@ def clean_wind_direction(df):
     df = df.fillna({"wind_dir_sin": 0.0, "wind_dir_cos": 0.0})
     df = df.drop("Wind_Direction", "wind_angle", "Wind_Direction_clean")
     return df
-
 
 def transform_binary_features(df):
     bool_cols = [
@@ -193,6 +192,13 @@ def inspect_last_bronze(spark):
         df = drop_columns(df, ["ID", "Description", "situation_date"])
         df = transform_binary_features(df)
 
+        cols_to_drop = [
+            "Start_Lat", "Start_Lng", "End_Lat", "End_Lng",
+            "Start_Time", "End_Time", "Zipcode"
+        ]
+        df = df.drop(*cols_to_drop)
+        df = manage_null_values(df)
+
         logging.info("--- Aperçu des 5 premières lignes ---")
         log_df_show(df, 100)
 
@@ -232,8 +238,6 @@ def inspect_last_bronze(spark):
     except Exception as e:
         logging.error(f"Erreur pendant l'inspection du Bronze : {e}")
 
-
-# MAIN
 setup_logger()
 
 spark = SparkSession.builder \
@@ -244,7 +248,7 @@ spark = SparkSession.builder \
 
 logging.info("Spark session initialisée")
 
-inspect_last_bronze(spark)
+inspect_last_bronze_traitement_and_save(spark)
 
 spark.stop()
 logging.info(" Fin de l analyse de pré-traitement")
