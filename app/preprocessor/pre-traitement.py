@@ -293,8 +293,9 @@ def inspect_last_bronze_traitement_and_save(spark):
 setup_logger()
 
 spark = SparkSession.builder \
-    .appName("Inspection Bronze") \
+    .appName("Silver - pre-traitement") \
     .config("spark.driver.memory", "4g") \
+    .enableHiveSupport() \
     .getOrCreate()
 
 logging.info("Spark session initialisée")
@@ -302,5 +303,5 @@ logging.info("Spark session initialisée")
 inspect_last_bronze_traitement_and_save(spark)
 
 spark.stop()
-logging.info("Fin de l’analyse pré-traitement")
+logging.info("Fin de l analyse pré-traitement")
  
