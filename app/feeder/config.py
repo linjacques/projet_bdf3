@@ -1,9 +1,9 @@
 import os
 
 class Config:
-    TEMP_PATH = "hdfs://namenode:8020/save_hdfs/pre_bronze"
-    BRONZE_ROOT = "hdfs://namenode:8020/save_hdfs/union"
-    ARGENT_ROOT = "hdfs://namenode:8020/lakehouse/silver/"
+    TEMP_PATH = "hdfs://namenode:8020/source/raw"
+    BRONZE_ROOT = "hdfs://namenode:8020/lakehouse/bronze"
+    ARGENT_ROOT = "hdfs://namenode:8020/lakehouse/silver"
 
 
     @staticmethod
