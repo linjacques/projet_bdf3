@@ -342,7 +342,7 @@ def inspect_last_bronze_traitement_and_save(spark):
         null_counts = df.select([
             count(when(col(c).isNull() | isnan(col(c)), c)).alias(c)
             for c in df.columns
-        ])
+        ]) 
 
         null_counts.show(truncate=False)
 
@@ -365,20 +365,19 @@ def inspect_last_bronze_traitement_and_save(spark):
         null_counts2 = df2_cleaned.select(null_counts_expr)
         null_counts2.show(truncate=False)
 
-        save_to_hive(df, "default.preprocessed_accidents_for_ML1")
-        save_to_hive(df2_cleaned, "default.preprocessed_accidents_for_join1")
+        # save_to_hive(df, "default.preprocessed_accidents_for_ml")
+        save_to_hive(df2_cleaned, "default.preprocessed_accidents_for_join")
 
 
     except Exception as e:
         logging.error(f"Erreur pendant l'inspection du Bronze : {e}")
 
-
-
 setup_logger()
 
 spark = SparkSession.builder \
-    .appName("Inspection Bronze") \
+    .appName("Silver - pré-traitement") \
     .config("spark.driver.memory", "4g") \
+    .enableHiveSupport() \
     .getOrCreate()
 
 logging.info("Spark session initialisée")
@@ -386,4 +385,4 @@ logging.info("Spark session initialisée")
 inspect_last_bronze_traitement_and_save(spark)
 
 spark.stop()
-logging.info("Fin de l’analyse pré-traitement")
+logging.info("Fin de l analyse pré-traitement")
