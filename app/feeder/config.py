@@ -1,9 +1,9 @@
 import os
 
 class Config:
-    TEMP_PATH = "hdfs://namenode:8020/save_hdfs/pre_bronze"
-    BRONZE_ROOT = "hdfs://namenode:8020/save_hdfs/union"
-
+    TEMP_PATH = "hdfs://namenode:8020/source/raw"
+    BRONZE_ROOT = "hdfs://namenode:8020/lakehouse/bronze"
+    
     @staticmethod
     def get_temp_dates(spark):  # <-- ajouter spark ici !
         try:

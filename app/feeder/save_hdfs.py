@@ -3,10 +3,10 @@ import logging
 import traceback
 from pyspark.sql import SparkSession
 from py4j.protocol import Py4JJavaError
-
+    
 class Config:
     TEMP_PATH = "/app/bronze_data/temp"
-    BRONZE_ROOT = "hdfs://namenode:8020/save_hdfs/pre_bronze"
+    BRONZE_ROOT = "hdfs://namenode:8020/source/raw"
 
     @staticmethod
     def get_temp_dates():
@@ -24,6 +24,7 @@ class Config:
 spark = SparkSession.builder \
     .appName("Feeder Local vers HDFS") \
     .config("spark.driver.memory", "4g") \
+    .enableHiveSupport() \
     .getOrCreate()
 
 logging.info(" Spark initialisé")
