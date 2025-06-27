@@ -11,7 +11,6 @@ def setup_logger(log_dir="logs", log_file=None):
         os.makedirs(log_dir)
 
     if not log_file:
-        # Exemple de nom : feeder_2025-06-20_15-42.log
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
         log_file = f"feeder_{timestamp}.log"
 
@@ -22,7 +21,7 @@ def setup_logger(log_dir="logs", log_file=None):
         format="%(asctime)s [%(levelname)s] %(message)s",
         handlers=[
             logging.FileHandler(log_path),
-            logging.StreamHandler()  # Affiche aussi dans le terminal
+            logging.StreamHandler()
         ]
     )
 
@@ -69,11 +68,8 @@ logging.info(f" Nouvelles dates à traiter : {dates_to_process}")
 for new_date in dates_to_process:
     logging.info(f"\n Traitement du jour : {new_date}")
 
-    # Chemin d'entrée dans pre_bronze sur HDFS
     path_today = Config.get_parquet_path(Config.TEMP_PATH, new_date)
-    # Pas besoin de préfixe "file://", c'est un chemin HDFS
-    # spark lit automatiquement les chemins HDFS avec ce format
-    # donc ici path_today = "hdfs://namenode:8020/save_hdfs/pre_bronze/{new_date}/parquet"
+
 
     df_today = spark.read.parquet(path_today)
     logging.info(f" {df_today.count()} lignes lues depuis {path_today}")
