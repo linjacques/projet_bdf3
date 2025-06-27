@@ -41,6 +41,8 @@ RUN wget https://archive.apache.org/dist/hive/hive-3.1.3/apache-hive-3.1.3-bin.t
 
 RUN pip install psycopg2-binary
 
+RUN pip install numpy 
+
 # -------------------
 # Working directory
 # -------------------

@@ -5,7 +5,7 @@ class Config:
     BRONZE_ROOT = "hdfs://namenode:8020/lakehouse/bronze"
     
     @staticmethod
-    def get_temp_dates(spark):  # <-- ajouter spark ici !
+    def get_temp_dates(spark):  
         try:
             hadoop_conf = spark._jsc.hadoopConfiguration()
             fs = spark._jvm.org.apache.hadoop.fs.FileSystem.get(hadoop_conf)

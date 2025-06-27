@@ -220,8 +220,8 @@ def inspect_last_bronze(spark):
         ])
         null_counts.show(truncate=False)
 
-        # Sauvegarde Hive 
-        hive_table_name = "hive_tables.preprocessed_accidents"
+        # Sauvegarde dans une table Hive 
+        hive_table_name = "default.preprocessed_accidents"
         df.write \
             .mode("overwrite") \
             .format("parquet") \
