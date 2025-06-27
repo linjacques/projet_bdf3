@@ -5,7 +5,6 @@ class Config:
     BRONZE_ROOT = "hdfs://namenode:8020/lakehouse/bronze"
     ARGENT_ROOT = "hdfs://namenode:8020/lakehouse/silver"
 
-
     @staticmethod
     def get_temp_dates(spark):
         try:
