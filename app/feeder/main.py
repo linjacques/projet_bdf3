@@ -32,8 +32,7 @@ setup_logger()
 
 
 spark = SparkSession.builder \
-    .appName("Feeder Optimisé Incrémental") \
-    .config("spark.driver.memory", "4g") \
+    .appName("feeder - main.py ") \
     .enableHiveSupport() \
     .getOrCreate()
 

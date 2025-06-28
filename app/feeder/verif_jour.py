@@ -2,8 +2,8 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import lit
 
 spark = SparkSession.builder \
-    .appName("Clone fichier parquet avec nouvelle date") \
-    .master("local[*]") \
+    .appName("feeder - verif_jour.py") \
+    .enableHiveSupport() \
     .getOrCreate()
 
 source_file = "file:///app/bronze_data/temp/2025_06_17/parquet/part-00002-0647e098-05d6-4a02-ab34-82f776979550-c000.snappy.parquet"

@@ -334,7 +334,6 @@ def inspect_last_bronze_traitement_and_save(spark):
             when(col("Weather_Condition").isNull() | (col("Weather_Condition") == ""), "Other").otherwise(col("Weather_Condition"))
         )
 
-        # Tu peux maintenant voir les changements
         df2_cleaned.show(truncate=False)
 
         total_count = df.count()
@@ -375,8 +374,7 @@ def inspect_last_bronze_traitement_and_save(spark):
 setup_logger()
 
 spark = SparkSession.builder \
-    .appName("Silver - pré-traitement") \
-    .config("spark.driver.memory", "4g") \
+    .appName("preprocessor - pre_traitement.py") \
     .enableHiveSupport() \
     .getOrCreate()
 

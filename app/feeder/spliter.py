@@ -62,8 +62,8 @@ class DataSplitter:
 if __name__ == "__main__":
     # Initialisation Spark en local
     spark = SparkSession.builder \
-        .appName("Split DataFrame") \
-        .master("local[*]") \
+        .appName("feeder - spliter.py") \
+        .enableHiveSupport() \
         .getOrCreate()
 
     # Chargement CSV local (à adapter selon ton chemin)

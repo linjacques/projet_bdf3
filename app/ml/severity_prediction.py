@@ -38,7 +38,7 @@ try:
 
     logging.info(" Initialisation SparkSession...")
     spark = SparkSession.builder \
-        .appName("AccidentSeverityPrediction") \
+        .appName("ml - severity_prediction.py") \
         .enableHiveSupport() \
         .getOrCreate()
 
