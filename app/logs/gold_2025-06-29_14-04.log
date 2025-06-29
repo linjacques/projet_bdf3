@@ -1,0 +1,11 @@
+2025-06-29 14:04:59,050 [INFO] Logger initialisé, les logs seront enregistrés ici : logs/gold_2025-06-29_14-04.log
+2025-06-29 14:10:18,166 [INFO]  SparkSession initialisée avec support Hive.
+2025-06-29 14:10:18,171 [INFO] 📥 Lecture de la table Hive : default.final_joined_accidents
+2025-06-29 14:10:38,560 [INFO]  Table chargée avec 7705148 lignes.
+2025-06-29 14:10:49,926 [INFO]  Datamart 1 (accidents par ville) exporté.
+2025-06-29 14:10:53,798 [INFO]  Datamart 2 (accidents et météo) exporté.
+2025-06-29 14:11:03,081 [INFO]  Datamart 3 (accidents par infrastructure) exporté.
+2025-06-29 14:11:07,546 [INFO]  Datamart 5 (accidents graves et météo) exporté.
+2025-06-29 14:16:08,186 [INFO]  Données exportées avec succès vers PostgreSQL.
+2025-06-29 14:16:09,520 [INFO]  Traitement terminé.
+2025-06-29 14:16:09,567 [INFO] Closing down clientserver connection

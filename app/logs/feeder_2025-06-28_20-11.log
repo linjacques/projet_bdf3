@@ -1,0 +1,18 @@
+2025-06-28 20:11:08,776 [INFO] Logger initialisé, les logs seront enregistrés ici : logs/feeder_2025-06-28_20-11.log
+2025-06-28 20:11:34,733 [INFO]  Spark prêt
+2025-06-28 20:11:34,752 [INFO]  Dernier bronze trouvé : None
+2025-06-28 20:11:34,778 [INFO]  Dates temp disponibles : ['2025_06_15', '2025_06_16']
+2025-06-28 20:11:34,779 [INFO]  Nouvelles dates à traiter : ['2025_06_15', '2025_06_16']
+2025-06-28 20:11:34,780 [INFO] 
+ Traitement du jour : 2025_06_15
+2025-06-28 20:11:45,859 [INFO]  2552639 lignes lues depuis hdfs://namenode:8020/source/raw/2025_06_15/parquet
+2025-06-28 20:11:45,928 [INFO]  Sauvegarde Bronze dans HDFS : hdfs://namenode:8020/lakehouse/bronze/2025_06_15/parquet
+2025-06-28 20:12:27,438 [INFO]  Bronze mis à jour pour 2025_06_15 : 2552639 lignes
+2025-06-28 20:12:27,439 [INFO] 
+ Traitement du jour : 2025_06_16
+2025-06-28 20:12:28,488 [INFO]  2549249 lignes lues depuis hdfs://namenode:8020/source/raw/2025_06_16/parquet
+2025-06-28 20:12:29,147 [INFO]  2552639 lignes dans le bronze précédent : 2025_06_15
+2025-06-28 20:12:29,202 [INFO]  Sauvegarde Bronze dans HDFS : hdfs://namenode:8020/lakehouse/bronze/2025_06_16/parquet
+2025-06-28 20:13:36,617 [INFO]  Bronze mis à jour pour 2025_06_16 : 5101888 lignes
+2025-06-28 20:13:37,156 [INFO]  Traitement terminé
+2025-06-28 20:13:37,165 [INFO] Closing down clientserver connection
