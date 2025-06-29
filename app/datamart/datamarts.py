@@ -23,7 +23,7 @@ setup_logger()
 # 2. Spark avec support Hive
 try:
     spark = SparkSession.builder \
-        .appName("GoldLayer - Add Column and Export") \
+        .appName("datamart - datamarts.py") \
         .enableHiveSupport() \
         .config("spark.jars", "/opt/hive/lib/postgresql-9.4.1208.jre7.jar") \
         .getOrCreate()
@@ -35,7 +35,7 @@ except Exception as e:
 # 3. Lecture depuis Hive
 table_hive = "default.final_joined_accidents"
 try:
-    logging.info(f"📥 Lecture de la table Hive : {table_hive}")
+    logging.info(f" Lecture de la table Hive : {table_hive}")
     df = spark.table(table_hive)
     logging.info(f" Table chargée avec {df.count()} lignes.")
     df.printSchema()
@@ -55,10 +55,10 @@ try:
         avg("duration_minutes_accident").alias("avg_duration")
     )
     df_city.write.jdbc(
-        url="jdbc:postgresql://host.docker.internal:5432/datamart",
+        url="jdbc:postgresql://host.docker.internal:5342/datamart",
         table="dm_accidents_by_city",
         mode="overwrite",
-        properties={"user": "postgres", "password": "20030205", "driver": "org.postgresql.Driver"}
+        properties={"user": "postgres", "password": "130902", "driver": "org.postgresql.Driver"}
     )
     logging.info(" Datamart 1 (accidents par ville) exporté.")
 except Exception as e:
@@ -74,10 +74,10 @@ try:
         avg("Visibility_km").alias("avg_visibility")
     )
     df_weather.write.jdbc(
-        url="jdbc:postgresql://host.docker.internal:5432/datamart",
+        url="jdbc:postgresql://host.docker.internal:5342/datamart",
         table="dm_weather_accidents",
         mode="overwrite",
-        properties={"user": "postgres", "password": "20030205", "driver": "org.postgresql.Driver"}
+        properties={"user": "postgres", "password": "130902", "driver": "org.postgresql.Driver"}
     )
     logging.info(" Datamart 2 (accidents et météo) exporté.")
 except Exception as e:
@@ -101,10 +101,10 @@ try:
     df_result = reduce(lambda a, b: a.unionByName(b), df_infra)
 
     df_result.write.jdbc(
-        url="jdbc:postgresql://host.docker.internal:5432/datamart",
+        url="jdbc:postgresql://host.docker.internal:5342/datamart",
         table="dm_accidents_by_infra",
         mode="overwrite",
-        properties={"user": "postgres", "password": "20030205", "driver": "org.postgresql.Driver"}
+        properties={"user": "postgres", "password": "130902", "driver": "org.postgresql.Driver"}
     )
     logging.info(" Datamart 3 (accidents par infrastructure) exporté.")
 except Exception as e:
@@ -120,10 +120,10 @@ try:
         avg("Humidity(%)").alias("avg_humidity")
     )
     df_grave_weather.write.jdbc(
-        url="jdbc:postgresql://host.docker.internal:5432/datamart",
+        url="jdbc:postgresql://host.docker.internal:5342/datamart",
         table="dm_grave_accidents_weather",
         mode="overwrite",
-        properties={"user": "postgres", "password": "20030205", "driver": "org.postgresql.Driver"}
+        properties={"user": "postgres", "password": "130902", "driver": "org.postgresql.Driver"}
     )
     logging.info(" Datamart 5 (accidents graves et météo) exporté.")
 except Exception as e:
@@ -133,12 +133,12 @@ except Exception as e:
 # 5. Export vers PostgreSQL
 try:
     df.write.jdbc(
-        url="jdbc:postgresql://host.docker.internal:5432/datamart",
+        url="jdbc:postgresql://host.docker.internal:5342/datamart",
         table="gold_final_accidents",
         mode="overwrite",
         properties={
             "user": "postgres",
-            "password": "20030205",
+            "password": "130902",
             "driver": "org.postgresql.Driver"
         }
     )

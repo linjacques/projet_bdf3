@@ -40,14 +40,14 @@ setup_logger()
 try:
     # Création de la SparkSession avec Hive
     spark = SparkSession.builder \
-        .appName("JoinPreprocessedData") \
+        .appName("preprocessor - join_ml.py") \
         .enableHiveSupport() \
         .getOrCreate()
     logging.info("SparkSession initialisée avec support Hive.")
 
     # Lecture des deux tables Hive
     logging.info("Lecture de la table 'predicted_severity'...")
-    df_ml = spark.table("default.predicted_severity")
+    df_ml = spark.table("default.predicted_severity_full")
     logging.info(f"Table df_ml chargée avec {df_ml.count()} lignes.")
     df_ml.printSchema()
 

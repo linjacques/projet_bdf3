@@ -106,5 +106,4 @@ for new_date in dates_to_process:
     last_bronze_date = new_date
 
 
-spark.stop()
 logging.info(" Traitement terminé")

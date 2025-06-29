@@ -63,6 +63,7 @@ services:
       - ENV SPARK_CONF_DIR=/opt/spark/conf
     ports:
       - "4040:4040"
+      - "8000:8000" # pour fastapi
     volumes:
       - ./app:/app
       - ./app/conf/hive/hive-site.xml:/opt/spark/conf/hive-site.xml

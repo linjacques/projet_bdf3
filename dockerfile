@@ -44,6 +44,13 @@ RUN pip install psycopg2-binary
 RUN pip install numpy 
 
 # -------------------
+# FastAPI
+# -------------------
+RUN pip install fastapi
+RUN pip install uvicorn
+RUN pip install sqlalchemy
+
+# -------------------
 # Working directory
 # -------------------
 WORKDIR /app
