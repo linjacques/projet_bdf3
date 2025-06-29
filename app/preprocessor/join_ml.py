@@ -4,7 +4,6 @@ import logging
 from datetime import datetime
 from pyspark.sql import SparkSession
 
-# Chemin vers les fichiers de config si nécessaire
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from feeder.config import Config
 
@@ -34,11 +33,9 @@ def save_to_hive(df, table_name):
     df.coalesce(1).write.mode("overwrite").format("parquet").saveAsTable(table_name)
     logging.info(f"Données enregistrées dans Hive sous : {table_name}")
 
-# Initialisation du logger
 setup_logger()
 
 try:
-    # Création de la SparkSession avec Hive
     spark = SparkSession.builder \
         .appName("preprocessor - join_ml.py") \
         .enableHiveSupport() \
@@ -47,7 +44,7 @@ try:
 
     # Lecture des deux tables Hive
     logging.info("Lecture de la table 'predicted_severity'...")
-    df_ml = spark.table("default.predicted_severity_full")
+    df_ml = spark.table("default.predicted_severity")
     logging.info(f"Table df_ml chargée avec {df_ml.count()} lignes.")
     df_ml.printSchema()
 
@@ -76,7 +73,6 @@ try:
     for row in df_final.limit(10).collect():
         logging.info(row)
 
-    # Sauvegarde dans Hive
     table_name = "default.final_joined_accidents"
     logging.info(f"Enregistrement du résultat dans la table Hive : {table_name}")
     save_to_hive(df_final, table_name)

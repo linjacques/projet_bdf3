@@ -45,8 +45,7 @@ try:
     logging.info(" Lecture de la table Hive : default.preprocessed_accidents_for_ml")
     df = spark.table("default.preprocessed_accidents_for_ml")
 
-    logging.info(" Sous-échantillonnage (10 %) pour éviter surcharge mémoire...")
-    df = df.sample(fraction=0.1, seed=42)  # Retire cette ligne en prod
+    logging.info("100% des données chargées ...")
 
     target_col = "Severity"
     numeric_cols = [
@@ -69,7 +68,7 @@ try:
         labelCol=target_col,
         featuresCol="features",
         numTrees=50,
-        maxBins=256
+        maxBins=400
     )
     model = rf.fit(train_data)
 
@@ -93,8 +92,8 @@ try:
     accuracy = evaluator.evaluate(model.transform(test_data))
     logging.info(f" Accuracy du modèle Random Forest : {accuracy:.4f}")
 
-    logging.info(" Aperçu du résultat final (100 lignes max) :")
-    sample_rows = df_final.limit(100).collect()
+    logging.info(" Aperçu du résultat final (5 lignes max) :")
+    sample_rows = df_final.limit(5).collect()
     header = "\t".join(df_final.columns)
     logging.info(header)
     for row in sample_rows:

@@ -10,7 +10,6 @@ from pyspark.ml.feature import StringIndexer
 from pyspark.ml import Pipeline
 
 from pyspark.sql.functions import col, count, when, isnan
-from pyspark.sql.types import FloatType, DoubleType
 import logging
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from feeder.config import Config

@@ -1,7 +1,6 @@
 from pyspark.sql import SparkSession, functions as F
 import os
 
-# Configuration simple
 class Config:
     SIMULATION_DATES = ["2025-06-15", "2025-06-16", "2025-06-17"]
     BRONZE_PATH = "./bronze_data"
@@ -60,13 +59,11 @@ class DataSplitter:
 
 
 if __name__ == "__main__":
-    # Initialisation Spark en local
     spark = SparkSession.builder \
         .appName("feeder - spliter.py") \
         .enableHiveSupport() \
         .getOrCreate()
 
-    # Chargement CSV local (à adapter selon ton chemin)
     df_initial = spark.read.csv("file:///app/source/US_Accidents_March23.csv", header=True, inferSchema=True)
 
     splitter = DataSplitter(spark)
